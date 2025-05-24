@@ -1,0 +1,373 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User accounts and authentication
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  username    String   @unique
+  passwordHash String
+  role        UserRole @default(USER)
+  reputation  Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  vApps       VApp[]
+  submissions Submission[]
+  flags       Flag[]       @relation("UserFlags")
+  stakes      Stake[]
+  apiKeys     APIKey[]
+  webhooks    Webhook[]    @relation("UserWebhooks")
+
+  @@map("users")
+}
+
+// API Keys for programmatic access
+model APIKey {
+  id          String    @id @default(cuid())
+  name        String
+  keyHash     String    @unique
+  permissions String[]  @default([])
+  isActive    Boolean   @default(true)
+  lastUsed    DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+// Verifiable Applications
+model VApp {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  version     String
+  authorId    String
+  repoUrl     String?
+  status      VAppStatus  @default(PENDING)
+  visibility  Visibility  @default(PUBLIC)
+  
+  // Metadata
+  metadata    Json        // vapp.yaml content
+  tags        String[]
+  category    String?
+  
+  // Verification
+  isVerified  Boolean     @default(false)
+  verifiedAt  DateTime?
+  
+  // Timestamps
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  author      User        @relation(fields: [authorId], references: [id])
+  submissions Submission[]
+  proofs      Proof[]
+  flags       Flag[]
+  stakes      Stake[]
+  exports     Export[]
+
+  @@map("vapps")
+}
+
+// Proof submissions and verification
+model Submission {
+  id          String           @id @default(uuid())
+  vAppId      String
+  userId      String
+  type        SubmissionType
+  
+  // Content
+  sourceHash  String           // IPFS hash of source code
+  proofHash   String           // IPFS hash of proof files
+  metadataHash String          // IPFS hash of metadata
+  
+  // Verification
+  status      SubmissionStatus @default(PENDING)
+  verifiedAt  DateTime?
+  
+  // Tracking
+  commitHash  String?          // Git commit hash
+  branch      String?          // Git branch
+  
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Relations
+  vApp        VApp             @relation(fields: [vAppId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id])
+  proofs      Proof[]
+  logs        VerificationLog[]
+
+  @@map("submissions")
+}
+
+// Zero-knowledge proofs
+model Proof {
+  id            String     @id @default(uuid())
+  vAppId        String
+  submissionId  String
+  
+  // Proof details
+  type          ProofType  // GROTH16, PLONK, STARK
+  circuitHash   String     // Hash of the circuit
+  proofData     Json       // Actual proof data
+  publicInputs  Json       // Public inputs
+  verifierKey   Json       // Verifier key
+  
+  // Verification
+  isValid       Boolean    @default(false)
+  verifiedAt    DateTime?
+  verifierNode  String?    // Which verifier node processed this
+  
+  // Blockchain anchoring
+  ethereumTxHash   String?
+  arbitrumTxHash   String?
+  starknetTxHash   String?
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  vApp          VApp       @relation(fields: [vAppId], references: [id], onDelete: Cascade)
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  logs          VerificationLog[]
+
+  @@map("proofs")
+}
+
+// Verification logs and audit trail
+model VerificationLog {
+  id           String    @id @default(uuid())
+  submissionId String
+  proofId      String?
+  
+  // Log details
+  level        LogLevel
+  message      String
+  details      Json?
+  verifierNode String?
+  
+  // Blockchain anchoring
+  chainId      Int?
+  txHash       String?
+  blockNumber  BigInt?
+  
+  createdAt    DateTime  @default(now())
+
+  // Relations
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  proof        Proof?     @relation(fields: [proofId], references: [id], onDelete: Cascade)
+
+  @@map("verification_logs")
+}
+
+// Community flagging system
+model Flag {
+  id          String     @id @default(uuid())
+  vAppId      String
+  flaggerId   String
+  
+  // Flag details
+  reason      FlagReason
+  description String?
+  evidence    Json?      // Supporting evidence
+  
+  // Status
+  status      FlagStatus @default(PENDING)
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  vApp        VApp       @relation(fields: [vAppId], references: [id], onDelete: Cascade)
+  flagger     User       @relation("UserFlags", fields: [flaggerId], references: [id])
+
+  @@map("flags")
+}
+
+// Staking and slashing system
+model Stake {
+  id          String      @id @default(uuid())
+  vAppId      String
+  stakerId    String
+  
+  // Stake details
+  amount      Decimal     @db.Decimal(18, 8)
+  currency    String      // ETH, ARB, STRK
+  chainId     Int
+  
+  // Status
+  status      StakeStatus @default(ACTIVE)
+  slashedAt   DateTime?
+  slashReason String?
+  
+  // Blockchain
+  txHash      String
+  blockNumber BigInt
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  vApp        VApp        @relation(fields: [vAppId], references: [id], onDelete: Cascade)
+  staker      User        @relation(fields: [stakerId], references: [id])
+
+  @@map("stakes")
+}
+
+// Export bundles for download
+model Export {
+  id          String     @id @default(uuid())
+  vAppId      String
+  
+  // Export details
+  type        ExportType
+  format      String     // zip, tar.gz, etc.
+  contentHash String     // IPFS hash
+  size        BigInt     // File size in bytes
+  
+  // Metadata
+  includes    String[]   // What's included in the export
+  version     String     // vApp version at time of export
+  
+  createdAt   DateTime   @default(now())
+  expiresAt   DateTime?  // Optional expiration
+
+  // Relations
+  vApp        VApp       @relation(fields: [vAppId], references: [id], onDelete: Cascade)
+
+  @@map("exports")
+}
+
+// Webhook configurations
+model Webhook {
+  id          String        @id @default(uuid())
+  url         String
+  secret      String
+  events      WebhookEvent[]
+  isActive    Boolean       @default(true)
+  
+  // Relations
+  userId      String
+  user        User          @relation("UserWebhooks", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Metadata
+  description String?
+  headers     Json?         // Custom headers
+  
+  // Stats
+  lastTriggered DateTime?
+  successCount  Int         @default(0)
+  failureCount  Int         @default(0)
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("webhooks")
+}
+
+// Enums
+enum VAppStatus {
+  PENDING
+  VERIFIED
+  FLAGGED
+  SUSPENDED
+  ARCHIVED
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
+enum SubmissionType {
+  HOSTED_PACKAGE
+  EXTERNAL_TRACKER
+}
+
+enum SubmissionStatus {
+  PENDING
+  PROCESSING
+  VERIFIED
+  FAILED
+  FLAGGED
+}
+
+enum ProofType {
+  GROTH16
+  PLONK
+  STARK
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+  DEBUG
+}
+
+enum FlagReason {
+  INVALID_PROOF
+  MALICIOUS_CODE
+  COPYRIGHT_VIOLATION
+  SPAM
+  OTHER
+}
+
+enum FlagStatus {
+  PENDING
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
+
+enum StakeStatus {
+  ACTIVE
+  SLASHED
+  WITHDRAWN
+}
+
+enum ExportType {
+  PROOF_BUNDLE
+  SOURCE_CODE
+  METADATA
+  FULL_PACKAGE
+}
+
+enum WebhookEvent {
+  VAPP_CREATED
+  VAPP_VERIFIED
+  VAPP_FLAGGED
+  PROOF_VERIFIED
+  PROOF_FAILED
+  SUBMISSION_CREATED
+  SUBMISSION_PROCESSED
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+  SUPER_ADMIN
+}

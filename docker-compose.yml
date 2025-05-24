@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: openvapps-postgres
+    environment:
+      POSTGRES_DB: openvapps_dev
+      POSTGRES_USER: openvapps
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - openvapps-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: openvapps-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - openvapps-network
+
+  # IPFS Node
+  ipfs:
+    image: ipfs/kubo:latest
+    container_name: openvapps-ipfs
+    ports:
+      - "4001:4001"     # P2P
+      - "5001:5001"     # API
+      - "8080:8080"     # Gateway
+    volumes:
+      - ipfs_data:/data/ipfs
+    networks:
+      - openvapps-network
+
+  # OpenvApps Hub API
+  hub-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openvapps-hub
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://openvapps:password@postgres:5432/openvapps_dev
+      REDIS_URL: redis://redis:6379
+      IPFS_API_URL: http://ipfs:5001
+      IPFS_GATEWAY_URL: http://ipfs:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+      - ipfs
+    volumes:
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+    networks:
+      - openvapps-network
+    command: npm run dev
+
+  # Verifier Cluster (Simulation)
+  verifier:
+    build:
+      context: .
+      dockerfile: Dockerfile.verifier
+    container_name: openvapps-verifier
+    environment:
+      NODE_ENV: development
+      REDIS_URL: redis://redis:6379
+      HUB_API_URL: http://hub-api:3000
+    depends_on:
+      - redis
+      - hub-api
+    networks:
+      - openvapps-network
+    deploy:
+      replicas: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: openvapps-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - hub-api
+    networks:
+      - openvapps-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  ipfs_data:
+
+networks:
+  openvapps-network:
+    driver: bridge
+
