@@ -80,7 +80,7 @@ export async function registerPlugins(app: FastifyInstance): Promise<void> {
         contact: {
           name: 'OpenvApps Team',
           url: 'https://openvapps.org',
-          email: 'support@openvapps.org',
+          email: 'team@openvapps.org',
         },
         license: {
           name: 'MIT',
@@ -157,7 +157,7 @@ export async function registerPlugins(app: FastifyInstance): Promise<void> {
       const { getPrismaClient } = require('@/database/connection');
       const prisma = getPrismaClient();
       
-      const keyRecord = await prisma.apiKey.findUnique({
+      const keyRecord = await prisma.aPIKey.findUnique({
         where: { keyHash: apiKey },
         include: { user: true },
       });
@@ -167,7 +167,7 @@ export async function registerPlugins(app: FastifyInstance): Promise<void> {
       }
 
       // Update last used timestamp
-      await prisma.apiKey.update({
+      await prisma.aPIKey.update({
         where: { id: keyRecord.id },
         data: { lastUsed: new Date() },
       });

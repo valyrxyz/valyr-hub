@@ -1,15 +1,67 @@
-import { create as createIPFS, IPFSHTTPClient } from 'ipfs-http-client';
 import { config } from '@/config/environment';
 import { logger } from '@/utils/logger';
-import { CID } from 'multiformats/cid';
+
+// Use dynamic imports for ESM modules
+let createHelia: any;
+let unixfs: any;
+let json: any;
+let CID: any;
+
+// Types for better IDE support
+type Helia = any;
+type UnixFS = any;
+type HeliaJSON = any;
 
 export class IPFSService {
-  private client: IPFSHTTPClient;
+  private helia: Helia | null = null;
+  private fs: UnixFS | null = null;
+  private j: HeliaJSON | null = null;
+  private initialized = false;
 
-  constructor() {
-    this.client = createIPFS({
-      url: config.IPFS_API_URL,
-    });
+  async initialize(): Promise<void> {
+    if (this.initialized) return;
+
+    try {
+      logger.info('Initializing Helia IPFS node...');
+      
+      // Dynamic imports for ESM modules
+      if (!createHelia) {
+        const heliaModule = await import('helia');
+        createHelia = heliaModule.createHelia;
+        
+        const unixfsModule = await import('@helia/unixfs');
+        unixfs = unixfsModule.unixfs;
+        
+        const jsonModule = await import('@helia/json');
+        json = jsonModule.json;
+        
+        const multiformatsModule = await import('multiformats/cid');
+        CID = multiformatsModule.CID;
+      }
+      
+      this.helia = await createHelia({
+        libp2p: {
+          addresses: {
+            listen: []
+          }
+        }
+      });
+
+      this.fs = unixfs(this.helia);
+      this.j = json(this.helia);
+      this.initialized = true;
+
+      logger.info('Helia IPFS node initialized successfully');
+    } catch (error) {
+      logger.error('Failed to initialize Helia IPFS node:', error);
+      throw new Error('Failed to initialize IPFS service');
+    }
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
   }
 
   /**
@@ -17,9 +69,13 @@ export class IPFSService {
    */
   async uploadFile(buffer: Buffer, filename: string): Promise<string> {
     try {
-      const result = await this.client.add(buffer);
-      logger.info(`File uploaded to IPFS: ${filename} -> ${result.cid.toString()}`);
-      return result.cid.toString();
+      await this.ensureInitialized();
+      
+      const cid = await this.fs!.addBytes(new Uint8Array(buffer));
+      const hash = cid.toString();
+      
+      logger.info(`File uploaded to IPFS: ${filename} -> ${hash}`);
+      return hash;
     } catch (error) {
       logger.error('IPFS upload failed:', error);
       throw new Error('Failed to upload file to IPFS');
@@ -31,8 +87,13 @@ export class IPFSService {
    */
   async uploadJSON(data: any, filename: string = 'data.json'): Promise<string> {
     try {
-      const buffer = Buffer.from(JSON.stringify(data, null, 2));
-      return await this.uploadFile(buffer, filename);
+      await this.ensureInitialized();
+      
+      const cid = await this.j!.add(data);
+      const hash = cid.toString();
+      
+      logger.info(`JSON uploaded to IPFS: ${filename} -> ${hash}`);
+      return hash;
     } catch (error) {
       logger.error('IPFS JSON upload failed:', error);
       throw new Error('Failed to upload JSON to IPFS');
@@ -44,19 +105,22 @@ export class IPFSService {
    */
   async uploadDirectory(files: { path: string; content: Buffer }[]): Promise<string> {
     try {
-      const results = [];
-      for await (const result of this.client.addAll(files)) {
-        results.push(result);
+      await this.ensureInitialized();
+      
+      // Use addAll for directory creation with multiple files
+      const entries = files.map(file => ({
+        path: file.path,
+        content: new Uint8Array(file.content)
+      }));
+
+      let rootCid: any;
+      for await (const entry of this.fs!.addAll(entries)) {
+        rootCid = entry.cid;
       }
 
-      // Return the root directory hash
-      const rootResult = results.find(r => r.path === '');
-      if (!rootResult) {
-        throw new Error('Failed to get root directory hash');
-      }
-
-      logger.info(`Directory uploaded to IPFS: ${rootResult.cid.toString()}`);
-      return rootResult.cid.toString();
+      const hash = rootCid.toString();
+      logger.info(`Directory uploaded to IPFS: ${hash}`);
+      return hash;
     } catch (error) {
       logger.error('IPFS directory upload failed:', error);
       throw new Error('Failed to upload directory to IPFS');
@@ -68,12 +132,26 @@ export class IPFSService {
    */
   async downloadFile(hash: string): Promise<Buffer> {
     try {
-      const chunks = [];
-      for await (const chunk of this.client.cat(hash)) {
+      await this.ensureInitialized();
+      
+      const cid = CID.parse(hash);
+      const bytes = await this.fs!.cat(cid);
+      
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of bytes) {
         chunks.push(chunk);
       }
-
-      const buffer = Buffer.concat(chunks);
+      
+      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+      const result = new Uint8Array(totalLength);
+      let offset = 0;
+      
+      for (const chunk of chunks) {
+        result.set(chunk, offset);
+        offset += chunk.length;
+      }
+      
+      const buffer = Buffer.from(result);
       logger.debug(`Downloaded file from IPFS: ${hash} (${buffer.length} bytes)`);
       return buffer;
     } catch (error) {
@@ -87,8 +165,12 @@ export class IPFSService {
    */
   async downloadJSON(hash: string): Promise<any> {
     try {
-      const buffer = await this.downloadFile(hash);
-      const data = JSON.parse(buffer.toString('utf-8'));
+      await this.ensureInitialized();
+      
+      const cid = CID.parse(hash);
+      const data = await this.j!.get(cid);
+      
+      logger.debug(`Downloaded JSON from IPFS: ${hash}`);
       return data;
     } catch (error) {
       logger.error(`IPFS JSON download failed for hash ${hash}:`, error);
@@ -101,7 +183,11 @@ export class IPFSService {
    */
   async pinFile(hash: string): Promise<void> {
     try {
-      await this.client.pin.add(hash);
+      await this.ensureInitialized();
+      
+      const cid = CID.parse(hash);
+      await this.helia!.pins.add(cid);
+      
       logger.info(`Pinned file to IPFS: ${hash}`);
     } catch (error) {
       logger.error(`IPFS pin failed for hash ${hash}:`, error);
@@ -114,7 +200,11 @@ export class IPFSService {
    */
   async unpinFile(hash: string): Promise<void> {
     try {
-      await this.client.pin.rm(hash);
+      await this.ensureInitialized();
+      
+      const cid = CID.parse(hash);
+      await this.helia!.pins.rm(cid);
+      
       logger.info(`Unpinned file from IPFS: ${hash}`);
     } catch (error) {
       logger.error(`IPFS unpin failed for hash ${hash}:`, error);
@@ -127,9 +217,11 @@ export class IPFSService {
    */
   async exists(hash: string): Promise<boolean> {
     try {
+      await this.ensureInitialized();
+      
       const cid = CID.parse(hash);
-      const stat = await this.client.object.stat(cid);
-      return stat.Hash.toString() === hash;
+      const stat = await this.fs!.stat(cid);
+      return stat.cid.toString() === hash;
     } catch (error: any) {
       logger.error(`IPFS exists check failed for hash ${hash}:`, error);
       return false;
@@ -141,11 +233,14 @@ export class IPFSService {
    */
   async getFileStats(hash: string): Promise<{ size: number; hash: string }> {
     try {
+      await this.ensureInitialized();
+      
       const cid = CID.parse(hash);
-      const stat = await this.client.object.stat(cid);
+      const stat = await this.fs!.stat(cid);
+      
       return {
-        size: stat.CumulativeSize,
-        hash: stat.Hash.toString(),
+        size: Number(stat.fileSize || stat.dagSize || 0),
+        hash: stat.cid.toString(),
       };
     } catch (error: any) {
       logger.error(`IPFS stat failed for hash ${hash}:`, error);
@@ -164,26 +259,36 @@ export class IPFSService {
    * Validate IPFS hash format
    */
   isValidHash(hash: string): boolean {
-    // Basic validation for IPFS hash format
-    return /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/.test(hash) || 
-           /^baf[a-z0-9]{56}$/.test(hash) ||
-           /^bafy[a-z0-9]{56}$/.test(hash);
+    try {
+      CID.parse(hash);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
    * Get file information
    */
   async getFileInfo(hash: string): Promise<{ size: number; hash: string }> {
+    return this.getFileStats(hash);
+  }
+
+  /**
+   * Stop the Helia node
+   */
+  async stop(): Promise<void> {
     try {
-      const cid = CID.parse(hash);
-      const stat = await this.client.object.stat(cid);
-      return {
-        size: stat.CumulativeSize,
-        hash: stat.Hash.toString(),
-      };
+      if (this.helia) {
+        await this.helia.stop();
+        this.helia = null;
+        this.fs = null;
+        this.j = null;
+        this.initialized = false;
+        logger.info('Helia IPFS node stopped');
+      }
     } catch (error) {
-      logger.error(`IPFS stat failed for hash ${hash}:`, error);
-      throw new Error(`Failed to get file info for hash: ${hash}`);
+      logger.error('Error stopping Helia IPFS node:', error);
     }
   }
 }

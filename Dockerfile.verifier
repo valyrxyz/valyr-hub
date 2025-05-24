@@ -1,5 +1,5 @@
 # Verifier Node Dockerfile
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -8,7 +8,8 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     build-base \
-    git
+    git \
+    openssl
 
 # Copy package files
 COPY package*.json ./

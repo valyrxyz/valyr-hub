@@ -12,6 +12,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openvapps -d openvapps_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - openvapps-network
 
@@ -43,7 +48,7 @@ services:
   hub-api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: openvapps-hub
     environment:
       NODE_ENV: development
@@ -51,19 +56,24 @@ services:
       REDIS_URL: redis://redis:6379
       IPFS_API_URL: http://ipfs:5001
       IPFS_GATEWAY_URL: http://ipfs:8080
+      JWT_SECRET: your-super-secret-jwt-key-for-development
+      LOG_LEVEL: info
+      LOG_PRETTY: "true"
     ports:
       - "3000:3000"
     depends_on:
-      - postgres
-      - redis
-      - ipfs
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      ipfs:
+        condition: service_started
     volumes:
       - ./src:/app/src
       - ./package.json:/app/package.json
       - ./tsconfig.json:/app/tsconfig.json
     networks:
       - openvapps-network
-    command: npm run dev
 
   # Verifier Cluster
   verifier:
@@ -74,9 +84,17 @@ services:
       NODE_ENV: development
       REDIS_URL: redis://redis:6379
       HUB_API_URL: http://hub-api:3000
+      DATABASE_URL: postgresql://openvapps:password@postgres:5432/openvapps_dev
+      JWT_SECRET: your-super-secret-jwt-key-for-development
+      LOG_LEVEL: info
+      LOG_PRETTY: "true"
     depends_on:
-      - redis
-      - hub-api
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      hub-api:
+        condition: service_started
     networks:
       - openvapps-network
     deploy:
