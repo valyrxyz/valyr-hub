@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY src ./src
@@ -32,9 +32,12 @@ RUN apk add --no-cache dumb-init
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S openvapps -u 1001
 
+# Copy package files and install production dependencies
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
 # Copy built application
 COPY --from=builder --chown=openvapps:nodejs /app/dist ./dist
-COPY --from=builder --chown=openvapps:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=openvapps:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=openvapps:nodejs /app/prisma ./prisma
 
