@@ -137,9 +137,9 @@ export class WebhookService {
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'X-OpenvApps-Signature': signature,
-        'X-OpenvApps-Event': payload.event,
-        'User-Agent': 'OpenvApps-Webhook/1.0',
+        'X-Valyr-Signature': signature,
+        'X-Valyr-Event': payload.event,
+        'User-Agent': 'Valyr-Webhook/1.0',
       };
 
       // Add custom headers if specified
@@ -346,9 +346,9 @@ export class WebhookService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-OpenvApps-Signature': signature,
-          'X-OpenvApps-Event': 'VAPP_CREATED',
-          'User-Agent': 'OpenvApps-Webhook-Test/1.0',
+          'X-Valyr-Signature': signature,
+          'X-Valyr-Event': 'VAPP_CREATED',
+          'User-Agent': 'Valyr-Webhook-Test/1.0',
         },
         body: payloadString,
         signal: AbortSignal.timeout(10000), // 10 second timeout for tests

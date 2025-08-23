@@ -1,6 +1,6 @@
-# Contributing to OpenvApps
+# Contributing to Valyr
 
-Thank you for your interest in contributing to OpenvApps! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Valyr! This document provides guidelines and information for contributors.
 
 ## 🤝 Code of Conduct
 
@@ -20,8 +20,8 @@ We are committed to providing a welcoming and inclusive environment for all cont
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/openvapps/openvapps-hub.git
-   cd openvapps-hub
+   git clone https://github.com/valyr/valyr-hub.git
+   cd valyr-hub
    ```
 
 2. **Install Dependencies**
@@ -260,7 +260,7 @@ describe('POST /api/v1/vapps', () => {
 - **GitHub Issues** - Bug reports and feature requests
 - **GitHub Discussions** - General questions and ideas
 - **Discord** - Real-time chat and community support
-- **Email** - Security issues: team@openvapps.org
+- **Email** - Security issues: team@valyr.org
 
 ## 🏷️ Commit Message Format
 
@@ -313,7 +313,7 @@ test(verification): add unit tests for STARK proof validation
 
 ## 📄 License
 
-By contributing to OpenvApps, you agree that your contributions will be licensed under the MIT License.
+By contributing to Valyr, you agree that your contributions will be licensed under the MIT License.
 
 ## 🙏 Recognition
 
@@ -323,5 +323,5 @@ Contributors will be recognized in:
 - Annual contributor highlights
 - Special Discord roles
 
-Thank you for contributing to OpenvApps! 🚀
+Thank you for contributing to Valyr! 🚀
 

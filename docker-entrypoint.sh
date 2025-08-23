@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "🚀 Starting OpenvApps Hub..."
+echo "🚀 Starting Valyr Hub..."
 
 # Wait for database to be ready
 echo "⏳ Waiting for database to be ready..."

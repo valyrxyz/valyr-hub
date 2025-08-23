@@ -1,7 +1,7 @@
-# OpenvApps Hub Architecture
-This document provides a comprehensive overview of the OpenvApps Hub architecture, design decisions, and system components.
+# Valyr Hub Architecture
+This document provides a comprehensive overview of the Valyr Hub architecture, design decisions, and system components.
 ## 🏗️ System Overview
-OpenvApps Hub is designed as a scalable, chain-agnostic platform for verifiable applications with zero-knowledge proofs. The architecture follows microservices principles with clear separation of concerns.
+Valyr Hub is designed as a scalable, chain-agnostic platform for verifiable applications with zero-knowledge proofs. The architecture follows microservices principles with clear separation of concerns.
 ```mermaid
 graph TB
     subgraph "Client Layer"
@@ -422,5 +422,5 @@ graph TB
 - [Contributing Guidelines](../CONTRIBUTING.md)
 ---
 For questions about the architecture, please:
-- Open an issue on [GitHub](https://github.com/openvapps/openvapps-hub/issues)
-- Email us at team@openvapps.org
+- Open an issue on [GitHub](https://github.com/valyr/valyr-hub/issues)
+- Email us at team@valyr.org

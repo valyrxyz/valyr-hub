@@ -1,7 +1,7 @@
-# OpenvApps Hub Database Documentation
-This document provides comprehensive information about the OpenvApps Hub database schema, relationships, and best practices.
+# Valyr Hub Database Documentation
+This document provides comprehensive information about the Valyr Hub database schema, relationships, and best practices.
 ## 📊 Database Overview
-OpenvApps Hub uses PostgreSQL as the primary database with Prisma as the ORM. The database is designed to handle:
+Valyr Hub uses PostgreSQL as the primary database with Prisma as the ORM. The database is designed to handle:
 - **vApp Management**: Application metadata and lifecycle
 - **Proof Verification**: Zero-knowledge proof storage and verification results
 - **User Management**: Authentication, authorization, and user profiles
@@ -32,5 +32,5 @@ erDiagram
     Stake ||--o{ SlashEvent : slashes
 ```
 
-For more information about the OpenvApps Hub database, see:
+For more information about the Valyr Hub database, see:
 - [API Documentation](API.md)

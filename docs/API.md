@@ -1,8 +1,8 @@
-# OpenvApps Hub API Documentation
+# Valyr Hub API Documentation
 ## Overview
-The OpenvApps Hub API provides a comprehensive interface for managing verifiable applications (vApps) with zero-knowledge proofs. This RESTful API supports all core functionality including vApp submission, verification, blockchain anchoring, and community moderation.
+The Valyr Hub API provides a comprehensive interface for managing verifiable applications (vApps) with zero-knowledge proofs. This RESTful API supports all core functionality including vApp submission, verification, blockchain anchoring, and community moderation.
 ## Base URLs
-- **Production**: `https://api.openvapps.org`
+- **Production**: `https://api.valyr.org`
 - **Local Development**: `http://localhost:3000`
 ## Authentication
 ### JWT Authentication
@@ -374,7 +374,7 @@ POST /api/v1/webhooks
 Content-Type: application/json
 Authorization: Bearer YOUR_TOKEN
 {
-  "url": "https://your-app.com/webhook/openvapps",
+  "url": "https://your-app.com/webhook/valyr",
   "events": [
     "verification.completed",
     "verification.failed",
@@ -392,7 +392,7 @@ Response:
   "success": true,
   "data": {
     "id": "webhook_123",
-    "url": "https://your-app.com/webhook/openvapps",
+    "url": "https://your-app.com/webhook/valyr",
     "events": [
       "verification.completed",
       "verification.failed",
@@ -598,13 +598,13 @@ function verifyWebhook(payload, signature, secret) {
 ## SDKs and Libraries
 ### JavaScript/TypeScript
 ```bash
-npm install @openvapps/sdk
+npm install @valyr/sdk
 ```
 ```javascript
-import { OpenvAppsClient } from '@openvapps/sdk';
-const client = new OpenvAppsClient({
+import { ValyrClient } from '@valyr/sdk';
+const client = new ValyrClient({
   apiKey: 'your-api-key',
-  baseUrl: 'https://api.openvapps.org'
+  baseUrl: 'https://api.valyr.org'
 });
 // Submit vApp
 const vapp = await client.vapps.create({
@@ -621,11 +621,11 @@ const verification = await client.verification.verify({
 
 ## OpenAPI Specification
 The complete OpenAPI 3.0 specification is available at:
-- **JSON**: `https://api.openvapps.org/openapi.json`
-- **YAML**: `https://api.openvapps.org/openapi.yaml`
-- **Interactive Docs**: `https://api.openvapps.org/docs`
+- **JSON**: `https://api.valyr.org/openapi.json`
+- **YAML**: `https://api.valyr.org/openapi.yaml`
+- **Interactive Docs**: `https://api.valyr.org/docs`
 ## Support
 For API support:
-- **Documentation**: [docs.openvapps.org](https://docs.openvapps.org)
-- **Email**: team@openvapps.org
-- **GitHub Issues**: [github.com/openvapps/openvapps-hub/issues](https://github.com/openvapps/openvapps-hub/issues)
+- **Documentation**: [docs.valyr.org](https://docs.valyr.org)
+- **Email**: team@valyr.org
+- **GitHub Issues**: [github.com/valyr/valyr-hub/issues](https://github.com/valyr/valyr-hub/issues)

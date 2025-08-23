@@ -1,5 +1,5 @@
-# OpenvApps Hub Deployment Guide
-This guide covers deploying OpenvApps Hub to various environments including development, staging, and production.
+# Valyr Hub Deployment Guide
+This guide covers deploying Valyr Hub to various environments including development, staging, and production.
 ## 📋 Prerequisites
 ### System Requirements
 - **Node.js**: 18.x or higher
@@ -23,7 +23,7 @@ PORT=3000
 LOG_LEVEL=info
 API_VERSION=v1
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/openvapps"
+DATABASE_URL="postgresql://username:password@localhost:5432/valyr"
 DATABASE_POOL_SIZE=20
 DATABASE_TIMEOUT=30000
 # Redis
@@ -62,12 +62,12 @@ SMTP_HOST="smtp.gmail.com"
 SMTP_PORT=587
 SMTP_USER="your-email@gmail.com"
 SMTP_PASS="your-app-password"
-FROM_EMAIL="noreply@openvapps.org"
+FROM_EMAIL="noreply@valyr.org"
 # Monitoring
 SENTRY_DSN="https://your-sentry-dsn"
 DATADOG_API_KEY="your-datadog-api-key"
 # Security
-CORS_ORIGIN="https://openvapps.org,https://app.openvapps.org"
+CORS_ORIGIN="https://valyr.org,https://app.valyr.org"
 TRUST_PROXY=true
 HELMET_ENABLED=true
 # Feature Flags
@@ -81,7 +81,7 @@ ENABLE_WEBHOOKS=true
 ```bash
 NODE_ENV=development
 LOG_LEVEL=debug
-DATABASE_URL="postgresql://postgres:password@localhost:5432/openvapps_dev"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/valyr_dev"
 REDIS_URL="redis://localhost:6379/1"
 CORS_ORIGIN="http://localhost:3000,http://localhost:3001"
 ```
@@ -89,17 +89,17 @@ CORS_ORIGIN="http://localhost:3000,http://localhost:3001"
 ```bash
 NODE_ENV=staging
 LOG_LEVEL=info
-DATABASE_URL="postgresql://user:pass@staging-db:5432/openvapps_staging"
+DATABASE_URL="postgresql://user:pass@staging-db:5432/valyr_staging"
 REDIS_URL="redis://staging-redis:6379"
-CORS_ORIGIN="https://staging.openvapps.org"
+CORS_ORIGIN="https://staging.valyr.org"
 ```
 #### Production
 ```bash
 NODE_ENV=production
 LOG_LEVEL=warn
-DATABASE_URL="postgresql://user:pass@prod-db:5432/openvapps"
+DATABASE_URL="postgresql://user:pass@prod-db:5432/valyr"
 REDIS_URL="redis://prod-redis:6379"
-CORS_ORIGIN="https://openvapps.org,https://app.openvapps.org"
+CORS_ORIGIN="https://valyr.org,https://app.valyr.org"
 ```
 ## 🐳 Docker Deployment
 ### Dockerfile
@@ -152,7 +152,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:password@db:5432/openvapps
+      - DATABASE_URL=postgresql://postgres:password@db:5432/valyr
       - REDIS_URL=redis://redis:6379
     depends_on:
       db:
@@ -168,7 +168,7 @@ services:
   db:
     image: postgres:14-alpine
     environment:
-      POSTGRES_DB: openvapps
+      POSTGRES_DB: valyr
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     volumes:
@@ -213,7 +213,7 @@ volumes:
 ### Build and Deploy
 ```bash
 # Build the Docker image
-docker build -t openvapps/hub:latest .
+docker build -t valyr/hub:latest .
 # Run with Docker Compose
 docker-compose up -d
 # Check logs
@@ -239,14 +239,14 @@ docker-compose up -d --scale app=3
 ### Debugging
 ```bash
 # Check application logs
-docker logs openvapps-hub
+docker logs valyr-hub
 # Check database connections
-docker exec -it postgres psql -U postgres -d openvapps -c "SELECT * FROM pg_stat_activity;"
+docker exec -it postgres psql -U postgres -d valyr -c "SELECT * FROM pg_stat_activity;"
 # Check Redis status
 docker exec -it redis redis-cli info
 # Monitor resource usage
-docker stats openvapps-hub
+docker stats valyr-hub
 ```
 For additional support:
-- **Documentation**: [docs.openvapps.org](https://docs.openvapps.org)
-- **Email**: team@openvapps.org
+- **Documentation**: [docs.valyr.org](https://docs.valyr.org)
+- **Email**: team@valyr.org

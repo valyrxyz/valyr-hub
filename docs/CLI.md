@@ -1,23 +1,23 @@
-# OpenvApps CLI Documentation
-The OpenvApps CLI is a command-line tool that provides developers with a seamless interface to interact with the OpenvApps Hub. It enables easy submission, verification, and management of verifiable applications (vApps) with zero-knowledge proofs.
+# Valyr CLI Documentation
+The Valyr CLI is a command-line tool that provides developers with a seamless interface to interact with the Valyr Hub. It enables easy submission, verification, and management of verifiable applications (vApps) with zero-knowledge proofs.
 ## 📦 Installation
 ### NPM Installation
 ```bash
 # Install globally
-npm install -g @openvapps/cli
+npm install -g @valyr/cli
 # Verify installation
 vapp --version
 ```
 ### Alternative Installation Methods
 ```bash
 # Using Yarn
-yarn global add @openvapps/cli
+yarn global add @valyr/cli
 # Using pnpm
-pnpm add -g @openvapps/cli
+pnpm add -g @valyr/cli
 # Using Homebrew (macOS)
-brew install openvapps/tap/vapp-cli
+brew install valyr/tap/vapp-cli
 # Download binary directly
-curl -L https://github.com/openvapps/cli/releases/latest/download/vapp-linux-x64 -o vapp
+curl -L https://github.com/valyr/cli/releases/latest/download/vapp-linux-x64 -o vapp
 chmod +x vapp
 sudo mv vapp /usr/local/bin/
 ```
@@ -25,7 +25,7 @@ sudo mv vapp /usr/local/bin/
 ### Initial Setup
 ```bash
 # Configure CLI with your API credentials
-vapp config set --hub-url https://api.openvapps.org
+vapp config set --hub-url https://api.valyr.org
 vapp config set --api-key your-api-key
 # Or use interactive setup
 vapp setup
@@ -38,7 +38,7 @@ vapp init my-zk-calculator --template groth16
 cd my-zk-calculator
 # 3. Build your circuit and generate proofs
 npm run build
-# 4. Submit to OpenvApps Hub
+# 4. Submit to Valyr Hub
 vapp submit
 # 5. Check verification status
 vapp status
@@ -50,7 +50,7 @@ vapp export --format bundle
 The CLI stores configuration in `~/.vapp/config.yaml`:
 ```yaml
 hub:
-  url: https://api.openvapps.org
+  url: https://api.valyr.org
   apiKey: your-api-key
   timeout: 30000
 defaults:
@@ -68,9 +68,9 @@ chains:
     rpcUrl: https://starknet-mainnet.public.blastapi.io
     privateKey: 0x...
 templates:
-  groth16: https://github.com/openvapps/templates/groth16
-  plonk: https://github.com/openvapps/templates/plonk
-  stark: https://github.com/openvapps/templates/stark
+  groth16: https://github.com/valyr/templates/groth16
+  plonk: https://github.com/valyr/templates/plonk
+  stark: https://github.com/valyr/templates/stark
 output:
   format: json
   verbose: false
@@ -79,7 +79,7 @@ output:
 ### Environment Variables
 ```bash
 # Override config with environment variables
-export VAPP_HUB_URL="https://api.openvapps.org"
+export VAPP_HUB_URL="https://api.valyr.org"
 export VAPP_API_KEY="your-api-key"
 export VAPP_DEFAULT_PROOF_TYPE="groth16"
 export VAPP_VERBOSE="true"
@@ -96,7 +96,7 @@ export VAPP_VERBOSE="true"
 ```
 ### Authentication Commands
 #### `vapp auth login`
-Authenticate with OpenvApps Hub using email/password or OAuth.
+Authenticate with Valyr Hub using email/password or OAuth.
 ```bash
 # Email/password login
 vapp auth login --email user@example.com
@@ -152,7 +152,7 @@ Options:
 - `bulletproof`: Bulletproof template
 - `custom`: Custom template from Git URL
 #### `vapp submit`
-Submit vApp to OpenvApps Hub for verification.
+Submit vApp to Valyr Hub for verification.
 ```bash
 vapp submit [options]
 # Examples:
@@ -395,7 +395,7 @@ vapp config list
 # Reset to defaults
 vapp config reset
 # Examples:
-vapp config set hub.url https://api.openvapps.org
+vapp config set hub.url https://api.valyr.org
 vapp config set defaults.proofType plonk
 vapp config get hub.url
 ```
@@ -477,8 +477,8 @@ jobs:
         with:
           node-version: '18'
           
-      - name: Install OpenvApps CLI
-        run: npm install -g @openvapps/cli
+      - name: Install Valyr CLI
+        run: npm install -g @valyr/cli
         
       - name: Configure CLI
         run: |
@@ -590,11 +590,11 @@ vapp submit --dry-run
 #### Network Issues
 ```bash
 # Test connectivity
-curl -I https://api.openvapps.org/health
+curl -I https://api.valyr.org/health
 # Check configuration
 vapp config get hub.url
 # Use different endpoint
-vapp config set hub.url https://staging-api.openvapps.org
+vapp config set hub.url https://staging-api.valyr.org
 ```
 ### Debug Mode
 ```bash
@@ -667,7 +667,7 @@ export:
 	vapp export $(shell vapp get --json | jq -r '.id') --format zip
 ```
 ## 🔗 Related Resources
-- [OpenvApps Hub API Documentation](API.md)
+- [Valyr Hub API Documentation](API.md)
 For CLI support:
-- **GitHub Issues**: [github.com/openvapps-hub/issues](https://github.com/openvapps-hub/issues)
-- **Email**: team@openvapps.org
+- **GitHub Issues**: [github.com/valyr-hub/issues](https://github.com/valyr-hub/issues)
+- **Email**: team@valyr.org

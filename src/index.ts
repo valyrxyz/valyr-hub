@@ -82,7 +82,7 @@ async function buildApp() {
     // API overview endpoint
     app.get('/api', async () => {
       return {
-        name: 'OpenvApps Hub API',
+        name: 'Valyr Hub API',
         version: '1.0.0',
         description: 'A neutral infrastructure layer for verifiable applications with zero-knowledge proofs',
         documentation: '/docs',
@@ -142,7 +142,7 @@ async function start() {
       host: config.HOST,
     });
 
-    app.log.info(`🚀 OpenvApps Hub API started on ${config.HOST}:${config.PORT}`);
+    app.log.info(`🚀 Valyr Hub API started on ${config.HOST}:${config.PORT}`);
     app.log.info(`📚 API Documentation: http://${config.HOST}:${config.PORT}/docs`);
     app.log.info(`🔍 Health Check: http://${config.HOST}:${config.PORT}/health`);
 

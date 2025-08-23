@@ -27,11 +27,11 @@ RUN npx prisma generate
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
-RUN adduser -S openvapps -u 1001
+RUN adduser -S valyr -u 1001
 
 # Set ownership and make script executable
 RUN chmod +x ./docker-entrypoint.sh && \
-    chown -R openvapps:nodejs /app
+    chown -R valyr:nodejs /app
 
 # Set environment variables
 ENV NODE_ENV=development
@@ -41,7 +41,7 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Switch to non-root user
-USER openvapps
+USER valyr
 
 # Start with entrypoint script
 ENTRYPOINT ["./docker-entrypoint.sh"]

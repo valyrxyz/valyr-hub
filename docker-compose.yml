@@ -2,10 +2,10 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: openvapps-postgres
+    container_name: valyr-postgres
     environment:
-      POSTGRES_DB: openvapps_dev
-      POSTGRES_USER: openvapps
+      POSTGRES_DB: valyr_dev
+      POSTGRES_USER: valyr
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
@@ -13,28 +13,28 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U openvapps -d openvapps_dev"]
+      test: ["CMD-SHELL", "pg_isready -U valyr -d valyr_dev"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - openvapps-network
+      - valyr-network
 
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: openvapps-redis
+    container_name: valyr-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - openvapps-network
+      - valyr-network
 
   # IPFS Node
   ipfs:
     image: ipfs/kubo:latest
-    container_name: openvapps-ipfs
+    container_name: valyr-ipfs
     ports:
       - "4001:4001"     # P2P
       - "5001:5001"     # API
@@ -42,17 +42,17 @@ services:
     volumes:
       - ipfs_data:/data/ipfs
     networks:
-      - openvapps-network
+      - valyr-network
 
-  # OpenvApps Hub API
+  # Valyr Hub API
   hub-api:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: openvapps-hub
+    container_name: valyr-hub
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://openvapps:password@postgres:5432/openvapps_dev
+      DATABASE_URL: postgresql://valyr:password@postgres:5432/valyr_dev
       REDIS_URL: redis://redis:6379
       IPFS_API_URL: http://ipfs:5001
       IPFS_GATEWAY_URL: http://ipfs:8080
@@ -73,7 +73,7 @@ services:
       - ./package.json:/app/package.json
       - ./tsconfig.json:/app/tsconfig.json
     networks:
-      - openvapps-network
+      - valyr-network
 
   # Verifier Cluster
   verifier:
@@ -84,7 +84,7 @@ services:
       NODE_ENV: development
       REDIS_URL: redis://redis:6379
       HUB_API_URL: http://hub-api:3000
-      DATABASE_URL: postgresql://openvapps:password@postgres:5432/openvapps_dev
+      DATABASE_URL: postgresql://valyr:password@postgres:5432/valyr_dev
       JWT_SECRET: your-super-secret-jwt-key-for-development
       LOG_LEVEL: info
       LOG_PRETTY: "true"
@@ -96,14 +96,14 @@ services:
       hub-api:
         condition: service_started
     networks:
-      - openvapps-network
+      - valyr-network
     deploy:
       replicas: 3
 
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
-    container_name: openvapps-nginx
+    container_name: valyr-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -113,7 +113,7 @@ services:
     depends_on:
       - hub-api
     networks:
-      - openvapps-network
+      - valyr-network
 
 volumes:
   postgres_data:
@@ -121,6 +121,6 @@ volumes:
   ipfs_data:
 
 networks:
-  openvapps-network:
+  valyr-network:
     driver: bridge
 

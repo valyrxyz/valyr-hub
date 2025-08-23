@@ -1,15 +1,15 @@
-# OpenvApps Hub
+# Valyr Hub
 
-![OpenvApps Logo](https://openvapps.org/images/logo.png)
+![Valyr Logo](https://valyr.org/images/logo.png)
 **A neutral infrastructure layer for publishing, verifying and exploring verifiable applications with zero-knowledge proofs**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![API Documentation](https://img.shields.io/badge/API-Documentation-green.svg)](docs/API.md)
-[Website](https://openvapps.org) • [Documentation](https://docs.openvapps.org) • [API Reference](https://api.openvapps.org/docs)
+[Website](https://valyr.org) • [Documentation](https://docs.valyr.org) • [API Reference](https://api.valyr.org/docs)
 
 ## 🌟 Overview
-OpenvApps is a chain-agnostic hub where developers publish, verify and launch verifiable applications (vApps) that include zero-knowledge proofs of execution. Every vApp ships with source links, verifier metadata and reproducible zk-SNARK/STARK artifacts—publicly auditable, chain-agnostic and API-accessible.
+Valyr is a chain-agnostic hub where developers publish, verify and launch verifiable applications (vApps) that include zero-knowledge proofs of execution. Every vApp ships with source links, verifier metadata and reproducible zk-SNARK/STARK artifacts—publicly auditable, chain-agnostic and API-accessible.
 ### Key Features
 - **🔐 Zero-Knowledge Verification** - Every application includes cryptographic proofs of execution
 - **🌐 Chain-Agnostic** - Support for Ethereum, Arbitrum, Starknet and more
@@ -26,7 +26,7 @@ flowchart LR
         B --> C[CLI: vapp submit]
     end
     
-    C -->|Bundle / Tracker| D((OpenvApps Hub))
+    C -->|Bundle / Tracker| D((Valyr Hub))
     D --> E{Verifier Cluster}
     E -->|Valid| F[Status: Verified]
     E -->|Invalid| G[Status: Flagged]
@@ -49,8 +49,8 @@ flowchart LR
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/openvapps/openvapps-hub.git
-cd openvapps-hub
+git clone https://github.com/valyr/valyr-hub.git
+cd valyr-hub
 # Install dependencies
 npm install
 # Copy environment configuration
@@ -61,7 +61,7 @@ nano .env
 ### Environment Configuration
 ```bash
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/openvapps"
+DATABASE_URL="postgresql://username:password@localhost:5432/valyr"
 # Redis
 REDIS_URL="redis://localhost:6379"
 # JWT Secret
@@ -105,13 +105,13 @@ npm run format
 ```
 ## 📚 API Documentation
 ### Base URL
-- **Production**: `https://api.openvapps.org`
+- **Production**: `https://api.valyr.org`
 - **Local**: `http://localhost:3000`
 ### Authentication
-OpenvApps Hub uses JWT-based authentication. Include your token in the Authorization header:
+Valyr Hub uses JWT-based authentication. Include your token in the Authorization header:
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     https://api.openvapps.org/api/v1/vapps
+     https://api.valyr.org/api/v1/vapps
 ```
 ### Core Endpoints
 #### vApps Management
@@ -221,7 +221,7 @@ Error responses:
 ## 🔧 CLI Usage
 ### Installation
 ```bash
-npm install -g @openvapps/cli
+npm install -g @valyr/cli
 ```
 ### Commands
 ```bash
@@ -242,7 +242,7 @@ vapp update vapp_123 --metadata ./updated-vapp.yaml
 Create `~/.vapp/config.yaml`:
 ```yaml
 hub:
-  url: https://api.openvapps.org
+  url: https://api.valyr.org
   apiKey: your-api-key
 defaults:
   proofType: groth16
@@ -257,7 +257,7 @@ chains:
 ## 🛠️ Development Guide
 ### Project Structure
 ```
-openvapps-hub/
+valyr-hub/
 ├── src/
 │   ├── api/
 │   │   ├── routes/          # API route handlers
@@ -279,7 +279,7 @@ openvapps-hub/
 └── scripts/                 # Utility scripts
 ```
 ### Database Schema
-The OpenvApps Hub uses PostgreSQL with the following core entities:
+The Valyr Hub uses PostgreSQL with the following core entities:
 - **VApps** - Application metadata and verification status
 - **Proofs** - Zero-knowledge proof artifacts
 - **Users** - Authentication and authorization
@@ -333,7 +333,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/openvapps
+      - DATABASE_URL=postgresql://postgres:password@db:5432/valyr
       - REDIS_URL=redis://redis:6379
     depends_on:
       - db
@@ -341,7 +341,7 @@ services:
   db:
     image: postgres:14
     environment:
-      POSTGRES_DB: openvapps
+      POSTGRES_DB: valyr
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     volumes:
@@ -380,7 +380,7 @@ GET /health
 GET /health/detailed
 ```
 ## 🤝 Contributing
-We welcome contributions to OpenvApps Hub! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions to Valyr Hub! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 ### Development Workflow
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
@@ -399,12 +399,12 @@ We welcome contributions to OpenvApps Hub! Please see our [Contributing Guide](C
 ## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 ## 🔗 Links
-- **Website**: [openvapps.org](https://openvapps.org)
-- **Documentation**: [docs.openvapps.org](https://docs.openvapps.org)
-- **API Reference**: [api.openvapps.org](https://api.openvapps.org/docs)
-- **X / Twitter**: [@openvapps](https://x.com/openvapps)
-- **GitHub**: [github.com/openvapps](https://github.com/openvapps)
+- **Website**: [valyr.org](https://valyr.org)
+- **Documentation**: [docs.valyr.org](https://docs.valyr.org)
+- **API Reference**: [api.valyr.org](https://api.valyr.org/docs)
+- **X / Twitter**: [@valyr](https://x.com/valyr)
+- **GitHub**: [github.com/valyr](https://github.com/valyr)
 ## 🙏 Acknowledgments
 - The zero-knowledge proof community for advancing cryptographic verification
-- All contributors who help make OpenvApps better
+- All contributors who help make Valyr better
 - The open-source projects that make this possible

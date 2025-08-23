@@ -1,6 +1,6 @@
-# OpenvApps Documentation
+# Valyr Documentation
 
-Welcome to the OpenvApps documentation! This guide will help you understand and use the OpenvApps platform for verifiable applications with zero-knowledge proofs.
+Welcome to the Valyr documentation! This guide will help you understand and use the Valyr platform for verifiable applications with zero-knowledge proofs.
 
 ## 📚 Table of Contents
 
@@ -15,8 +15,8 @@ Welcome to the OpenvApps documentation! This guide will help you understand and 
 
 1. **Installation**
    ```bash
-   git clone https://github.com/openvapps/openvapps-hub.git
-   cd openvapps-hub
+   git clone https://github.com/valyr/valyr-hub.git
+   cd valyr-hub
    npm install
    ```
 
@@ -40,7 +40,7 @@ Welcome to the OpenvApps documentation! This guide will help you understand and 
 
 ## 🏗️ Architecture Overview
 
-OpenvApps consists of four main components:
+Valyr consists of four main components:
 
 ### 1. AI Starters
 - Generates boilerplate code and test circuits
@@ -64,7 +64,7 @@ OpenvApps consists of four main components:
 
 ## 🔗 Blockchain Integration
 
-OpenvApps supports multiple blockchain networks:
+Valyr supports multiple blockchain networks:
 
 - **Ethereum** — Verification logs and proof anchoring
 - **Arbitrum** — L2 scaling for high-throughput verification
@@ -150,7 +150,7 @@ Applications that include zero-knowledge proofs of execution. Each vApp contains
 
 ## 📄 License
 
-OpenvApps is released under the MIT License. See [LICENSE](../LICENSE) for details.
+Valyr is released under the MIT License. See [LICENSE](../LICENSE) for details.
 
 ---
 

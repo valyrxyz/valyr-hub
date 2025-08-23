@@ -33,9 +33,9 @@ export async function registerPlugins(app: FastifyInstance): Promise<void> {
       
       // In production, you should specify allowed origins
       const allowedOrigins = [
-        'https://openvapps.org',
-        'https://app.openvapps.org',
-        'https://docs.openvapps.org',
+        'https://valyr.org',
+        'https://app.valyr.org',
+        'https://docs.valyr.org',
       ];
       
       if (allowedOrigins.includes(origin)) {
@@ -74,13 +74,13 @@ export async function registerPlugins(app: FastifyInstance): Promise<void> {
     openapi: {
       openapi: '3.0.0',
       info: {
-        title: 'OpenvApps Hub API',
+        title: 'Valyr Hub API',
         description: 'A neutral infrastructure layer for verifiable applications with zero-knowledge proofs',
         version: '1.0.0',
         contact: {
-          name: 'OpenvApps Team',
-          url: 'https://openvapps.org',
-          email: 'team@openvapps.org',
+          name: 'Valyr Team',
+          url: 'https://valyr.org',
+          email: 'team@valyr.org',
         },
         license: {
           name: 'MIT',
@@ -93,7 +93,7 @@ export async function registerPlugins(app: FastifyInstance): Promise<void> {
           description: 'Development server',
         },
         {
-          url: 'https://api.openvapps.org',
+          url: 'https://api.valyr.org',
           description: 'Production server',
         },
       ],

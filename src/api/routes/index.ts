@@ -31,7 +31,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   // Root API info
   app.get('/api', async () => {
     return {
-      name: 'OpenvApps Hub API',
+      name: 'Valyr Hub API',
       version: '1.0.0',
       description: 'A neutral infrastructure layer for verifiable applications with zero-knowledge proofs',
       documentation: '/docs',

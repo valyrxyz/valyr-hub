@@ -1,7 +1,7 @@
 {
-  "name": "@openvapps/hub",
+  "name": "@valyr/hub",
   "version": "1.0.0",
-  "description": "OpenvApps - Neutral infrastructure for verifiable applications with zero-knowledge proofs",
+  "description": "Valyr - Neutral infrastructure for verifiable applications with zero-knowledge proofs",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -18,8 +18,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx src/database/seed.ts",
     "db:studio": "prisma studio",
-    "docker:build": "docker build -t openvapps-hub .",
-    "docker:run": "docker run -p 3000:3000 openvapps-hub"
+    "docker:build": "docker build -t valyr-hub .",
+    "docker:run": "docker run -p 3000:3000 valyr-hub"
   },
   "keywords": [
     "zero-knowledge",
@@ -29,7 +29,7 @@
     "cryptography",
     "web3"
   ],
-  "author": "OpenvApps Team",
+  "author": "Valyr Team",
   "license": "MIT",
   "dependencies": {
     "@fastify/cors": "^8.4.0",
