@@ -62,12 +62,12 @@ SMTP_HOST="smtp.gmail.com"
 SMTP_PORT=587
 SMTP_USER="your-email@gmail.com"
 SMTP_PASS="your-app-password"
-FROM_EMAIL="noreply@valyr.org"
+FROM_EMAIL="noreply@valyr.xyz"
 # Monitoring
 SENTRY_DSN="https://your-sentry-dsn"
 DATADOG_API_KEY="your-datadog-api-key"
 # Security
-CORS_ORIGIN="https://valyr.org,https://app.valyr.org"
+CORS_ORIGIN="https://valyr.xyz,https://app.valyr.xyz"
 TRUST_PROXY=true
 HELMET_ENABLED=true
 # Feature Flags
@@ -91,7 +91,7 @@ NODE_ENV=staging
 LOG_LEVEL=info
 DATABASE_URL="postgresql://user:pass@staging-db:5432/valyr_staging"
 REDIS_URL="redis://staging-redis:6379"
-CORS_ORIGIN="https://staging.valyr.org"
+CORS_ORIGIN="https://staging.valyr.xyz"
 ```
 #### Production
 ```bash
@@ -99,7 +99,7 @@ NODE_ENV=production
 LOG_LEVEL=warn
 DATABASE_URL="postgresql://user:pass@prod-db:5432/valyr"
 REDIS_URL="redis://prod-redis:6379"
-CORS_ORIGIN="https://valyr.org,https://app.valyr.org"
+CORS_ORIGIN="https://valyr.xyz,https://app.valyr.xyz"
 ```
 ## 🐳 Docker Deployment
 ### Dockerfile
@@ -248,5 +248,5 @@ docker exec -it redis redis-cli info
 docker stats valyr-hub
 ```
 For additional support:
-- **Documentation**: [docs.valyr.org](https://docs.valyr.org)
-- **Email**: team@valyr.org
+- **Documentation**: [docs.valyr.xyz](https://docs.valyr.xyz)
+- **Email**: team@valyr.xyz

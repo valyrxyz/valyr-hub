@@ -17,7 +17,7 @@ pnpm add -g @valyr/cli
 # Using Homebrew (macOS)
 brew install valyr/tap/vapp-cli
 # Download binary directly
-curl -L https://github.com/valyr/cli/releases/latest/download/vapp-linux-x64 -o vapp
+curl -L https://github.com/valyrxyz/cli/releases/latest/download/vapp-linux-x64 -o vapp
 chmod +x vapp
 sudo mv vapp /usr/local/bin/
 ```
@@ -25,7 +25,7 @@ sudo mv vapp /usr/local/bin/
 ### Initial Setup
 ```bash
 # Configure CLI with your API credentials
-vapp config set --hub-url https://api.valyr.org
+vapp config set --hub-url https://api.valyr.xyz
 vapp config set --api-key your-api-key
 # Or use interactive setup
 vapp setup
@@ -50,7 +50,7 @@ vapp export --format bundle
 The CLI stores configuration in `~/.vapp/config.yaml`:
 ```yaml
 hub:
-  url: https://api.valyr.org
+  url: https://api.valyr.xyz
   apiKey: your-api-key
   timeout: 30000
 defaults:
@@ -68,9 +68,9 @@ chains:
     rpcUrl: https://starknet-mainnet.public.blastapi.io
     privateKey: 0x...
 templates:
-  groth16: https://github.com/valyr/templates/groth16
-  plonk: https://github.com/valyr/templates/plonk
-  stark: https://github.com/valyr/templates/stark
+  groth16: https://github.com/valyrxyz/templates/groth16
+  plonk: https://github.com/valyrxyz/templates/plonk
+  stark: https://github.com/valyrxyz/templates/stark
 output:
   format: json
   verbose: false
@@ -79,7 +79,7 @@ output:
 ### Environment Variables
 ```bash
 # Override config with environment variables
-export VAPP_HUB_URL="https://api.valyr.org"
+export VAPP_HUB_URL="https://api.valyr.xyz"
 export VAPP_API_KEY="your-api-key"
 export VAPP_DEFAULT_PROOF_TYPE="groth16"
 export VAPP_VERBOSE="true"
@@ -395,7 +395,7 @@ vapp config list
 # Reset to defaults
 vapp config reset
 # Examples:
-vapp config set hub.url https://api.valyr.org
+vapp config set hub.url https://api.valyr.xyz
 vapp config set defaults.proofType plonk
 vapp config get hub.url
 ```
@@ -590,11 +590,11 @@ vapp submit --dry-run
 #### Network Issues
 ```bash
 # Test connectivity
-curl -I https://api.valyr.org/health
+curl -I https://api.valyr.xyz/health
 # Check configuration
 vapp config get hub.url
 # Use different endpoint
-vapp config set hub.url https://staging-api.valyr.org
+vapp config set hub.url https://staging-api.valyr.xyz
 ```
 ### Debug Mode
 ```bash
@@ -670,4 +670,4 @@ export:
 - [Valyr Hub API Documentation](API.md)
 For CLI support:
 - **GitHub Issues**: [github.com/valyr-hub/issues](https://github.com/valyr-hub/issues)
-- **Email**: team@valyr.org
+- **Email**: team@valyr.xyz

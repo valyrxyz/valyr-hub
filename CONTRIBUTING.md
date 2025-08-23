@@ -20,7 +20,7 @@ We are committed to providing a welcoming and inclusive environment for all cont
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/valyr/valyr-hub.git
+   git clone https://github.com/valyrxyz/valyr-hub.git
    cd valyr-hub
    ```
 
@@ -260,7 +260,7 @@ describe('POST /api/v1/vapps', () => {
 - **GitHub Issues** - Bug reports and feature requests
 - **GitHub Discussions** - General questions and ideas
 - **Discord** - Real-time chat and community support
-- **Email** - Security issues: team@valyr.org
+- **Email** - Security issues: team@valyr.xyz
 
 ## 🏷️ Commit Message Format
 

@@ -33,9 +33,9 @@ export async function registerPlugins(app: FastifyInstance): Promise<void> {
       
       // In production, you should specify allowed origins
       const allowedOrigins = [
-        'https://valyr.org',
-        'https://app.valyr.org',
-        'https://docs.valyr.org',
+        'https://valyr.xyz',
+        'https://app.valyr.xyz',
+        'https://docs.valyr.xyz',
       ];
       
       if (allowedOrigins.includes(origin)) {
@@ -79,8 +79,8 @@ export async function registerPlugins(app: FastifyInstance): Promise<void> {
         version: '1.0.0',
         contact: {
           name: 'Valyr Team',
-          url: 'https://valyr.org',
-          email: 'team@valyr.org',
+          url: 'https://valyr.xyz',
+          email: 'team@valyr.xyz',
         },
         license: {
           name: 'MIT',
@@ -93,7 +93,7 @@ export async function registerPlugins(app: FastifyInstance): Promise<void> {
           description: 'Development server',
         },
         {
-          url: 'https://api.valyr.org',
+          url: 'https://api.valyr.xyz',
           description: 'Production server',
         },
       ],

@@ -422,5 +422,5 @@ graph TB
 - [Contributing Guidelines](../CONTRIBUTING.md)
 ---
 For questions about the architecture, please:
-- Open an issue on [GitHub](https://github.com/valyr/valyr-hub/issues)
-- Email us at team@valyr.org
+- Open an issue on [GitHub](https://github.com/valyrxyz/valyr-hub/issues)
+- Email us at team@valyr.xyz

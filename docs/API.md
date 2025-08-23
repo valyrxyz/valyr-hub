@@ -2,7 +2,7 @@
 ## Overview
 The Valyr Hub API provides a comprehensive interface for managing verifiable applications (vApps) with zero-knowledge proofs. This RESTful API supports all core functionality including vApp submission, verification, blockchain anchoring, and community moderation.
 ## Base URLs
-- **Production**: `https://api.valyr.org`
+- **Production**: `https://api.valyr.xyz`
 - **Local Development**: `http://localhost:3000`
 ## Authentication
 ### JWT Authentication
@@ -604,7 +604,7 @@ npm install @valyr/sdk
 import { ValyrClient } from '@valyr/sdk';
 const client = new ValyrClient({
   apiKey: 'your-api-key',
-  baseUrl: 'https://api.valyr.org'
+  baseUrl: 'https://api.valyr.xyz'
 });
 // Submit vApp
 const vapp = await client.vapps.create({
@@ -621,11 +621,11 @@ const verification = await client.verification.verify({
 
 ## OpenAPI Specification
 The complete OpenAPI 3.0 specification is available at:
-- **JSON**: `https://api.valyr.org/openapi.json`
-- **YAML**: `https://api.valyr.org/openapi.yaml`
-- **Interactive Docs**: `https://api.valyr.org/docs`
+- **JSON**: `https://api.valyr.xyz/openapi.json`
+- **YAML**: `https://api.valyr.xyz/openapi.yaml`
+- **Interactive Docs**: `https://api.valyr.xyz/docs`
 ## Support
 For API support:
-- **Documentation**: [docs.valyr.org](https://docs.valyr.org)
-- **Email**: team@valyr.org
-- **GitHub Issues**: [github.com/valyr/valyr-hub/issues](https://github.com/valyr/valyr-hub/issues)
+- **Documentation**: [docs.valyr.xyz](https://docs.valyr.xyz)
+- **Email**: team@valyr.xyz
+- **GitHub Issues**: [github.com/valyr/valyr-hub/issues](https://github.com/valyrxyz/valyr-hub/issues)

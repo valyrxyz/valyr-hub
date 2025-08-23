@@ -1,12 +1,12 @@
 # Valyr Hub
 
-![Valyr Logo](https://valyr.org/images/logo.png)
+![Valyr Logo](https://valyr.xyz/images/logo.png)
 **A neutral infrastructure layer for publishing, verifying and exploring verifiable applications with zero-knowledge proofs**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![API Documentation](https://img.shields.io/badge/API-Documentation-green.svg)](docs/API.md)
-[Website](https://valyr.org) • [Documentation](https://docs.valyr.org) • [API Reference](https://api.valyr.org/docs)
+[Website](https://valyr.xyz) • [Documentation](https://docs.valyr.xyz) • [API Reference](https://api.valyr.xyz/docs)
 
 ## 🌟 Overview
 Valyr is a chain-agnostic hub where developers publish, verify and launch verifiable applications (vApps) that include zero-knowledge proofs of execution. Every vApp ships with source links, verifier metadata and reproducible zk-SNARK/STARK artifacts—publicly auditable, chain-agnostic and API-accessible.
@@ -49,7 +49,7 @@ flowchart LR
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/valyr/valyr-hub.git
+git clone https://github.com/valyrxyz/valyr-hub.git
 cd valyr-hub
 # Install dependencies
 npm install
@@ -105,13 +105,13 @@ npm run format
 ```
 ## 📚 API Documentation
 ### Base URL
-- **Production**: `https://api.valyr.org`
+- **Production**: `https://api.valyr.xyz`
 - **Local**: `http://localhost:3000`
 ### Authentication
 Valyr Hub uses JWT-based authentication. Include your token in the Authorization header:
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     https://api.valyr.org/api/v1/vapps
+     https://api.valyr.xyz/api/v1/vapps
 ```
 ### Core Endpoints
 #### vApps Management
@@ -242,7 +242,7 @@ vapp update vapp_123 --metadata ./updated-vapp.yaml
 Create `~/.vapp/config.yaml`:
 ```yaml
 hub:
-  url: https://api.valyr.org
+  url: https://api.valyr.xyz
   apiKey: your-api-key
 defaults:
   proofType: groth16
@@ -399,11 +399,11 @@ We welcome contributions to Valyr Hub! Please see our [Contributing Guide](CONTR
 ## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 ## 🔗 Links
-- **Website**: [valyr.org](https://valyr.org)
-- **Documentation**: [docs.valyr.org](https://docs.valyr.org)
-- **API Reference**: [api.valyr.org](https://api.valyr.org/docs)
-- **X / Twitter**: [@valyr](https://x.com/valyr)
-- **GitHub**: [github.com/valyr](https://github.com/valyr)
+- **Website**: [valyr.xyz](https://valyr.xyz)
+- **Documentation**: [docs.valyr.xyz](https://docs.valyr.xyz)
+- **API Reference**: [api.valyr.xyz](https://api.valyr.xyz/docs)
+- **X / Twitter**: [@valyrxyz](https://x.com/valyrxyz)
+- **GitHub**: [github.com/valyrxyz](https://github.com/valyrxyz)
 ## 🙏 Acknowledgments
 - The zero-knowledge proof community for advancing cryptographic verification
 - All contributors who help make Valyr better

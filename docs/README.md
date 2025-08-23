@@ -15,7 +15,7 @@ Welcome to the Valyr documentation! This guide will help you understand and use 
 
 1. **Installation**
    ```bash
-   git clone https://github.com/valyr/valyr-hub.git
+   git clone https://github.com/valyrxyz/valyr-hub.git
    cd valyr-hub
    npm install
    ```
