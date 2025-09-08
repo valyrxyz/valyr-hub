@@ -2,12 +2,36 @@ import { ethers } from 'ethers';
 import { Account, RpcProvider } from 'starknet';
 import { config } from '@/config/environment';
 import { logger } from '@/utils/logger';
+import { withRetry, RetryableError } from '@/utils/retry';
+import { circuitBreakerRegistry } from '@/utils/circuit-breaker';
+import { cacheService } from '@/services/redis';
 
 export class BlockchainService {
   private ethereumProvider?: ethers.JsonRpcProvider;
   private arbitrumProvider?: ethers.JsonRpcProvider;
   private starknetProvider?: RpcProvider;
 
+  // Circuit breakers for different blockchain networks
+  private ethereumCircuitBreaker = circuitBreakerRegistry.getOrCreate('ethereum', {
+    failureThreshold: 3,
+    recoveryTimeout: 60000,
+    monitoringPeriod: 120000,
+    expectedErrors: (error) => error.message.includes('RPC') || error.message.includes('network'),
+  });
+
+  private arbitrumCircuitBreaker = circuitBreakerRegistry.getOrCreate('arbitrum', {
+    failureThreshold: 3,
+    recoveryTimeout: 60000,
+    monitoringPeriod: 120000,
+    expectedErrors: (error) => error.message.includes('RPC') || error.message.includes('network'),
+  });
+
+  private starknetCircuitBreaker = circuitBreakerRegistry.getOrCreate('starknet', {
+    failureThreshold: 3,
+    recoveryTimeout: 60000,
+    monitoringPeriod: 120000,
+    expectedErrors: (error) => error.message.includes('RPC') || error.message.includes('network'),
+  });
   constructor() {
     this.initializeProviders();
   }
@@ -329,5 +353,211 @@ export class BlockchainService {
     }
 
     return costs;
+  }
+  /**
+   * Batch verify multiple hashes on Ethereum
+   */
+  async batchVerifyEthereumAnchors(verificationHashes: string[]): Promise<Array<{ hash: string; anchored: boolean; blockNumber?: number }>> {
+    if (!this.ethereumProvider || !config.ETHEREUM_REGISTRY_CONTRACT) {
+      throw new Error('Ethereum configuration not available');
+    }
+
+    return this.ethereumCircuitBreaker.execute(async () => {
+      return withRetry(
+        async () => {
+          const contractABI = [
+            'function getAnchor(bytes32 hash) external view returns (uint256)',
+          ];
+
+          const contract = new ethers.Contract(
+            config.ETHEREUM_REGISTRY_CONTRACT!,
+            contractABI,
+            this.ethereumProvider!
+          );
+
+          const results = await Promise.allSettled(
+            verificationHashes.map(async (hash) => {
+              const hashBytes32 = ethers.keccak256(ethers.toUtf8Bytes(hash));
+              if (!contract?.getAnchor) throw new Error("Contract getAnchor method not available");
+              const blockNumber = await contract.getAnchor(hashBytes32);
+              
+              return {
+                hash,
+                anchored: blockNumber > 0,
+                ...(blockNumber > 0 && { blockNumber: Number(blockNumber) }),
+              };
+            })
+          );
+
+          return results.map((result, index) => {
+            if (result.status === 'fulfilled') {
+              return result.value;
+            } else {
+              logger.warn(`Failed to verify hash ${verificationHashes[index]}:`, result.reason);
+              return {
+                hash: verificationHashes[index],
+                anchored: false,
+              };
+            }
+          });
+        },
+        { maxAttempts: 3, baseDelay: 2000 },
+        'Ethereum batch verification'
+      );
+    });
+  }
+
+  /**
+   * Batch verify multiple hashes on Arbitrum
+   */
+  async batchVerifyArbitrumAnchors(verificationHashes: string[]): Promise<Array<{ hash: string; anchored: boolean; blockNumber?: number }>> {
+    if (!this.arbitrumProvider || !config.ARBITRUM_REGISTRY_CONTRACT) {
+      throw new Error('Arbitrum configuration not available');
+    }
+
+    return this.arbitrumCircuitBreaker.execute(async () => {
+      return withRetry(
+        async () => {
+          const contractABI = [
+            'function getAnchor(bytes32 hash) external view returns (uint256)',
+          ];
+
+          const contract = new ethers.Contract(
+            config.ARBITRUM_REGISTRY_CONTRACT!,
+            contractABI,
+            this.arbitrumProvider!
+          );
+
+          const results = await Promise.allSettled(
+            verificationHashes.map(async (hash) => {
+              const hashBytes32 = ethers.keccak256(ethers.toUtf8Bytes(hash));
+              if (!contract?.getAnchor) throw new Error("Contract getAnchor method not available");
+              const blockNumber = await contract.getAnchor(hashBytes32);
+              
+              return {
+                hash,
+                anchored: blockNumber > 0,
+                ...(blockNumber > 0 && { blockNumber: Number(blockNumber) }),
+              };
+            })
+          );
+
+          return results.map((result, index) => {
+            if (result.status === 'fulfilled') {
+              return result.value;
+            } else {
+              logger.warn(`Failed to verify hash ${verificationHashes[index]}:`, result.reason);
+              return {
+                hash: verificationHashes[index],
+                anchored: false,
+              };
+            }
+          });
+        },
+        { maxAttempts: 3, baseDelay: 2000 },
+        'Arbitrum batch verification'
+      );
+    });
+  }
+
+  /**
+   * Cache blockchain verification results
+   */
+  private generateBlockchainCacheKey(network: string, hash: string): string {
+    return `blockchain_${network}:${hash}`;
+  }
+
+  private async getCachedVerification(network: string, hash: string): Promise<any | null> {
+    try {
+      const cacheKey = this.generateBlockchainCacheKey(network, hash);
+      const cached = await cacheService.get(cacheKey);
+      if (cached) {
+        logger.info(`Using cached blockchain verification for ${network}:${hash}`);
+        return JSON.parse(cached);
+      }
+    } catch (error) {
+      logger.warn(`Failed to retrieve cached verification for ${network}:${hash}:`, error);
+    }
+    return null;
+  }
+
+  private async cacheVerification(network: string, hash: string, result: any): Promise<void> {
+    try {
+      const cacheKey = this.generateBlockchainCacheKey(network, hash);
+      // Cache for 10 minutes (blockchain state changes frequently)
+      await cacheService.setex(cacheKey, 600, JSON.stringify(result));
+      logger.info(`Cached blockchain verification for ${network}:${hash}`);
+    } catch (error) {
+      logger.warn(`Failed to cache verification for ${network}:${hash}:`, error);
+    }
+  }
+
+  /**
+   * Enhanced Ethereum verification with caching and circuit breaker
+   */
+  async verifyEthereumAnchorEnhanced(verificationHash: string): Promise<{ anchored: boolean; blockNumber?: number }> {
+    // Check cache first
+    const cached = await this.getCachedVerification('ethereum', verificationHash);
+    if (cached) {
+      return cached;
+    }
+
+    const result = await this.ethereumCircuitBreaker.execute(async () => {
+      return withRetry(
+        () => this.verifyEthereumAnchor(verificationHash),
+        { maxAttempts: 3, baseDelay: 2000 },
+        'Ethereum anchor verification'
+      );
+    });
+
+    // Cache the result
+    await this.cacheVerification('ethereum', verificationHash, result);
+    return result;
+  }
+
+  /**
+   * Enhanced Arbitrum verification with caching and circuit breaker
+   */
+  async verifyArbitrumAnchorEnhanced(verificationHash: string): Promise<{ anchored: boolean; blockNumber?: number }> {
+    // Check cache first
+    const cached = await this.getCachedVerification('arbitrum', verificationHash);
+    if (cached) {
+      return cached;
+    }
+
+    const result = await this.arbitrumCircuitBreaker.execute(async () => {
+      return withRetry(
+        () => this.verifyArbitrumAnchor(verificationHash),
+        { maxAttempts: 3, baseDelay: 2000 },
+        'Arbitrum anchor verification'
+      );
+    });
+
+    // Cache the result
+    await this.cacheVerification('arbitrum', verificationHash, result);
+    return result;
+  }
+
+  /**
+   * Enhanced Starknet verification with caching and circuit breaker
+   */
+  async verifyStarknetAnchorEnhanced(verificationHash: string): Promise<{ anchored: boolean; blockNumber?: number }> {
+    // Check cache first
+    const cached = await this.getCachedVerification('starknet', verificationHash);
+    if (cached) {
+      return cached;
+    }
+
+    const result = await this.starknetCircuitBreaker.execute(async () => {
+      return withRetry(
+        () => this.verifyStarknetAnchor(verificationHash),
+        { maxAttempts: 3, baseDelay: 2000 },
+        'Starknet anchor verification'
+      );
+    });
+
+    // Cache the result
+    await this.cacheVerification('starknet', verificationHash, result);
+    return result;
   }
 }
