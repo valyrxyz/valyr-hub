@@ -29,6 +29,11 @@ model User {
   stakes      Stake[]
   apiKeys     APIKey[]
   webhooks    Webhook[]    @relation("UserWebhooks")
+  
+  // Billing relations
+  usageLogs   ApiUsageLog[] @relation("UserUsageLogs")
+  credits     UserCredit?   @relation("UserCredits")
+  tokens      UsageToken[]  @relation("UserTokens")
 
   @@map("users")
 }
@@ -48,6 +53,9 @@ model APIKey {
   // Relations
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Billing relations
+  usageLogs ApiUsageLog[] @relation("ApiKeyUsageLogs")
 
   @@map("api_keys")
 }
@@ -370,4 +378,202 @@ enum UserRole {
   MODERATOR
   ADMIN
   SUPER_ADMIN
+}
+
+// API Usage Tracking and Billing Models
+
+// API usage logs for metering and billing
+model ApiUsageLog {
+  id              String    @id @default(uuid())
+  
+  // Identity tracking
+  userId          String?
+  apiKeyId        String?
+  userAgent       String?
+  ipAddress       String?
+  
+  // Request details
+  method          String    // GET, POST, PUT, DELETE
+  endpoint        String    // /api/v1/vapps
+  fullPath        String    // /api/v1/vapps/123?param=value
+  
+  // Size tracking
+  requestSize     Int       // Request body size in bytes
+  responseSize    Int       // Response body size in bytes
+  
+  // Performance tracking
+  startTime       DateTime
+  endTime         DateTime
+  duration        Int       // Duration in milliseconds
+  
+  // Status tracking
+  statusCode      Int       // HTTP status code
+  success         Boolean   // Whether the request was successful
+  errorMessage    String?   // Error message if failed
+  
+  // Billing context
+  creditsCost     Decimal?  @db.Decimal(18, 8) // Credits deducted for this call
+  pricingTier     String?   // Pricing tier used
+  
+  // Metadata
+  metadata        Json?     // Additional context data
+  
+  createdAt       DateTime  @default(now())
+
+  // Relations
+  user            User?     @relation("UserUsageLogs", fields: [userId], references: [id], onDelete: SetNull)
+  apiKey          APIKey?   @relation("ApiKeyUsageLogs", fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([apiKeyId, createdAt])
+  @@index([endpoint, createdAt])
+  @@index([createdAt])
+  @@map("api_usage_logs")
+}
+
+// User credit balances and transactions
+model UserCredit {
+  id              String          @id @default(uuid())
+  userId          String          @unique
+  
+  // Balance tracking
+  balance         Decimal         @db.Decimal(18, 8) @default(0)
+  totalAllocated  Decimal         @db.Decimal(18, 8) @default(0)
+  totalUsed       Decimal         @db.Decimal(18, 8) @default(0)
+  
+  // Credit limits and alerts
+  lowBalanceThreshold Decimal?    @db.Decimal(18, 8)
+  autoTopupEnabled    Boolean     @default(false)
+  autoTopupAmount     Decimal?    @db.Decimal(18, 8)
+  
+  // Status
+  isActive        Boolean         @default(true)
+  suspendedAt     DateTime?
+  suspensionReason String?
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  user            User            @relation("UserCredits", fields: [userId], references: [id], onDelete: Cascade)
+  transactions    CreditTransaction[]
+  
+  @@map("user_credits")
+}
+
+// Credit transaction history
+model CreditTransaction {
+  id              String                @id @default(uuid())
+  userCreditId    String
+  
+  // Transaction details
+  type            CreditTransactionType
+  amount          Decimal               @db.Decimal(18, 8)
+  balanceBefore   Decimal               @db.Decimal(18, 8)
+  balanceAfter    Decimal               @db.Decimal(18, 8)
+  
+  // Context
+  description     String?
+  reference       String?               // External reference (payment ID, usage log ID, etc.)
+  metadata        Json?
+  
+  // Processing
+  processedAt     DateTime              @default(now())
+  processedBy     String?               // Admin user ID if manual
+  
+  createdAt       DateTime              @default(now())
+
+  // Relations
+  userCredit      UserCredit            @relation(fields: [userCreditId], references: [id], onDelete: Cascade)
+  
+  @@index([userCreditId, createdAt])
+  @@index([type, createdAt])
+  @@map("credit_transactions")
+}
+
+// Tokenized usage data for trading/redemption
+model UsageToken {
+  id              String        @id @default(uuid())
+  userId          String
+  
+  // Token details
+  tokenId         String        @unique // Blockchain token ID
+  chainId         Int           // Which blockchain
+  contractAddress String        // Token contract address
+  
+  // Usage data snapshot
+  usageStartDate  DateTime
+  usageEndDate    DateTime
+  totalApiCalls   Int
+  totalCreditsUsed Decimal      @db.Decimal(18, 8)
+  
+  // Token metadata
+  metadata        Json          // Detailed usage breakdown
+  proofHash       String?       // IPFS hash of usage proof
+  
+  // Status
+  status          TokenStatus   @default(MINTED)
+  mintedAt        DateTime      @default(now())
+  redeemedAt      DateTime?
+  redeemedBy      String?
+  
+  // Blockchain tracking
+  mintTxHash      String?
+  redeemTxHash    String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  user            User          @relation("UserTokens", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, status])
+  @@index([chainId, contractAddress])
+  @@map("usage_tokens")
+}
+
+// Pricing configuration
+model PricingTier {
+  id              String        @id @default(uuid())
+  name            String        @unique
+  description     String?
+  
+  // Pricing rules
+  basePrice       Decimal       @db.Decimal(18, 8) // Base price per API call
+  sizeMultiplier  Decimal       @db.Decimal(10, 6) @default(1) // Price multiplier per KB
+  durationMultiplier Decimal    @db.Decimal(10, 6) @default(1) // Price multiplier per second
+  
+  // Endpoint-specific pricing
+  endpointPricing Json?         // { "/api/v1/proofs": 0.1, "/api/v1/verification": 0.05 }
+  
+  // Limits
+  maxRequestSize  Int?          // Max request size in bytes
+  maxDuration     Int?          // Max duration in milliseconds
+  
+  // Status
+  isActive        Boolean       @default(true)
+  isDefault       Boolean       @default(false)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@map("pricing_tiers")
+}
+
+// New enums for billing system
+enum CreditTransactionType {
+  TOPUP           // Credit added to account
+  USAGE           // Credit deducted for API usage
+  REFUND          // Credit refunded
+  ADJUSTMENT      // Manual adjustment
+  BONUS           // Promotional credit
+  PENALTY         // Credit penalty/fine
+}
+
+enum TokenStatus {
+  MINTED          // Token created and minted
+  TRANSFERRED     // Token transferred to another user
+  REDEEMED        // Token redeemed for value
+  EXPIRED         // Token expired
+  BURNED          // Token burned/destroyed
 }
