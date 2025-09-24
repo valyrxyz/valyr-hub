@@ -1,12 +1,15 @@
 # Valyr Hub
 
-![Valyr Logo](https://valyr.xyz/images/logo.png)
+![Valyr Logo](https://valyr.xyz/images/logo.svg)
+
 **A neutral infrastructure layer for publishing, verifying and exploring verifiable applications with zero-knowledge proofs**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![API Documentation](https://img.shields.io/badge/API-Documentation-green.svg)](docs/API.md)
-[Website](https://valyr.xyz) • [Documentation](https://docs.valyr.xyz) • [API Reference](https://api.valyr.xyz/docs)
+[![Website](https://img.shields.io/badge/Website-Visit-blue?style=flat-square)](https://valyr.xyz)
+[![Documentation](https://img.shields.io/badge/Documentation-Read-blue?style=flat-square)](https://docs.valyr.xyz)
+[![API Reference](https://img.shields.io/badge/API%20Reference-Docs-blue?style=flat-square)](https://api.valyr.xyz/docs)
 
 ## 🌟 Overview
 Valyr is a chain-agnostic hub where developers publish, verify and launch verifiable applications (vApps) that include zero-knowledge proofs of execution. Every vApp ships with source links, verifier metadata and reproducible zk-SNARK/STARK artifacts—publicly auditable, chain-agnostic and API-accessible.
@@ -408,3 +411,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - The zero-knowledge proof community for advancing cryptographic verification
 - All contributors who help make Valyr better
 - The open-source projects that make this possible
+
